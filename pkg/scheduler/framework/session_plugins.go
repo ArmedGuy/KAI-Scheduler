@@ -55,10 +55,17 @@ func (ssn *Session) AddCanReclaimResourcesFn(crf api.CanReclaimResourcesFn) {
 	ssn.CanReclaimResourcesFns = append(ssn.CanReclaimResourcesFns, crf)
 }
 
-func (ssn *Session) AddReclaimableFn(rf api.EvictableFn) {
-	ssn.ReclaimableFns = append(ssn.ReclaimableFns, rf)
+func (ssn *Session) AddHasReclaimableResourcesFn(hrrf api.HasReclaimableResourcesFn) {
+	ssn.HasReclaimableResourcesFns = append(ssn.HasReclaimableResourcesFns, hrrf)
 }
 
+func (ssn *Session) AddIsPreemptibleFn(ief api.IsEvictableFn) {
+	ssn.IsPreemptibleFns = append(ssn.IsPreemptibleFns, ief)
+}
+
+func (ssn *Session) AddIsReclaimableFn(ief api.IsEvictableFn) {
+	ssn.IsReclaimableFns = append(ssn.IsReclaimableFns, ief)
+}
 func (ssn *Session) AddOnJobSolutionStartFn(jssf api.OnJobSolutionStartFn) {
 	ssn.OnJobSolutionStartFns = append(ssn.OnJobSolutionStartFns, jssf)
 }
@@ -78,22 +85,58 @@ func (ssn *Session) AddHttpHandler(path string, handler func(http.ResponseWriter
 }
 
 func (ssn *Session) CanReclaimResources(reclaimer *reclaimer_info.ReclaimerInfo) bool {
-	for _, canReclaimFn := range ssn.CanReclaimResourcesFns {
-		return canReclaimFn(reclaimer)
+	if len(ssn.CanReclaimResourcesFns) == 0 {
+		return false
 	}
 
-	return false
+	ret := true
+	for _, canReclaimFn := range ssn.CanReclaimResourcesFns {
+		ret = ret && canReclaimFn(reclaimer)
+	}
+
+	return ret
 }
 
-func (ssn *Session) Reclaimable(
+func (ssn *Session) HasReclaimableResources(
 	reclaimer *reclaimer_info.ReclaimerInfo,
 	reclaimeeResourcesByQueue map[common_info.QueueID][]*resource_info.Resource,
 ) bool {
-	for _, rf := range ssn.ReclaimableFns {
-		return rf(reclaimer, reclaimeeResourcesByQueue)
+	if len(ssn.HasReclaimableResourcesFns) == 0 {
+		return false
 	}
 
-	return false
+	ret := true
+	for _, hrrf := range ssn.HasReclaimableResourcesFns {
+		ret = ret && hrrf(reclaimer, reclaimeeResourcesByQueue)
+	}
+
+	return ret
+}
+
+func (ssn *Session) IsPreemptible(reclaimer, job *podgroup_info.PodGroupInfo) bool {
+	if len(ssn.IsPreemptibleFns) == 0 {
+		return true
+	}
+
+	ret := true
+	for _, ief := range ssn.IsPreemptibleFns {
+		ret = ret && ief(reclaimer, job)
+	}
+
+	return ret
+}
+
+func (ssn *Session) IsReclaimable(reclaimer, job *podgroup_info.PodGroupInfo) bool {
+	if len(ssn.IsReclaimableFns) == 0 {
+		return true
+	}
+
+	ret := true
+	for _, ief := range ssn.IsReclaimableFns {
+		ret = ret && ief(reclaimer, job)
+	}
+
+	return ret
 }
 
 func (ssn *Session) OnJobSolutionStart() {

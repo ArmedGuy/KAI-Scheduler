@@ -101,7 +101,7 @@ func (ra *reclaimAction) attemptToReclaimForSpecificJob(
 	solver := solvers.NewJobsSolver(
 		feasibleNodes,
 		reclaimableScenarioCheck(ssn, reclaimerInfo),
-		getOrderedVictimsQueue(ssn, reclaimer.Queue),
+		getOrderedVictimsQueue(ssn, reclaimer),
 		framework.Reclaim)
 	return solver.Solve(ssn, reclaimer)
 }
@@ -111,7 +111,7 @@ func reclaimableScenarioCheck(ssn *framework.Session,
 	return func(
 		pendingJob *podgroup_info.PodGroupInfo,
 		victimJobs []*podgroup_info.PodGroupInfo) bool {
-		return ssn.Reclaimable(reclaimerInfo, calcVictimResources(victimJobs))
+		return ssn.HasReclaimableResources(reclaimerInfo, calcVictimResources(victimJobs))
 	}
 }
 
@@ -142,7 +142,7 @@ func calcVictimResources(victimJobs []*podgroup_info.PodGroupInfo) map[common_in
 	return totalVictimsResources
 }
 
-func getOrderedVictimsQueue(ssn *framework.Session, evictingQueue common_info.QueueID) solvers.GenerateVictimsQueue {
+func getOrderedVictimsQueue(ssn *framework.Session, reclaimer *podgroup_info.PodGroupInfo) solvers.GenerateVictimsQueue {
 	return func() *utils.JobsOrderByQueues {
 		jobsOrderedByQueue := utils.NewJobsOrderByQueues(ssn, utils.JobsOrderInitOptions{
 			FilterNonPreemptible:     true,
@@ -152,7 +152,10 @@ func getOrderedVictimsQueue(ssn *framework.Session, evictingQueue common_info.Qu
 		})
 		jobs := map[common_info.PodGroupID]*podgroup_info.PodGroupInfo{}
 		for _, job := range ssn.PodGroupInfos {
-			if job.Queue != evictingQueue {
+			if !ssn.IsReclaimable(reclaimer, job) {
+				continue
+			}
+			if job.Queue != reclaimer.Queue {
 				jobs[job.UID] = job
 			}
 		}

@@ -23,8 +23,11 @@ type PrePredicateFn func(*pod_info.PodInfo, *podgroup_info.PodGroupInfo) error
 // CanReclaimResourcesFn is a function that determines if a reclaimer can get more resources
 type CanReclaimResourcesFn func(*reclaimer_info.ReclaimerInfo) bool
 
-// EvictableFn is a function which determines if a reclaimer can reclaim a victim.
-type EvictableFn func(*reclaimer_info.ReclaimerInfo, map[common_info.QueueID][]*resource_info.Resource) bool
+// HasReclaimableResources is a function which determines if a reclaimer can reclaim a list of victims.
+type HasReclaimableResourcesFn func(*reclaimer_info.ReclaimerInfo, map[common_info.QueueID][]*resource_info.Resource) bool
+
+// IsEvictableFn is a function which determines if a reclaimer/preempter can evict a victim.
+type IsEvictableFn func(*podgroup_info.PodGroupInfo, *podgroup_info.PodGroupInfo) bool
 
 // QueueResource is a function which returns the resource of a queue.
 type QueueResource func(*queue_info.QueueInfo) *resource_info.ResourceRequirements

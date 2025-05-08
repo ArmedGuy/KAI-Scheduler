@@ -620,24 +620,24 @@ var _ = Describe("Reclaimable - Single department", func() {
 		reclaimable = New(true, taskOrderFunc)
 	})
 	It("Reclaimer is below fair share, reclaimee above fair share", func() {
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimer is below fair share, reclaimer exactly at fair share", func() {
 		queues["p2"].GPU.Allocated = 2
 		queues["default"].GPU.Allocated = 4
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer and reclaimee are below fair share", func() {
 		queues["p2"].GPU.Allocated = 1
 		queues["default"].GPU.Allocated = 3
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer below deserved and reclaimee above deserved (within fair share)", func() {
 		queues["p2"].GPU.FairShare = 3
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimer at fair share, reclaimee above fair share, department below fair share", func() {
@@ -645,26 +645,26 @@ var _ = Describe("Reclaimable - Single department", func() {
 		queues["default"].GPU.Allocated = 6
 		queues["default"].GPU.Deserved = 7
 		queues["default"].GPU.FairShare = 7
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer at fair share, reclaimee above fair share, department above fair share", func() {
 		queues["p1"].GPU.Allocated = 3
 		queues["default"].GPU.Allocated = 6
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer above deserved, attempting to reclaim for non preemptible job", func() {
 		queues["p1"].GPU.Deserved = 2
 		reclaimerInfo.IsPreemptable = false
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimer department only preemptible above deserved, attempting to reclaim for non preemptible job", func() {
 		queues["p1"].GPU.Deserved = 2
 		reclaimerInfo.IsPreemptable = false
 		queues["default"].GPU.Deserved = 3
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimer department nonpreemtible equal to deserved, attempting to reclaim for non preemptible job", func() {
@@ -672,7 +672,7 @@ var _ = Describe("Reclaimable - Single department", func() {
 		reclaimerInfo.IsPreemptable = false
 		queues["default"].GPU.Deserved = 3
 		queues["default"].GPU.AllocatedNotPreemptible = 3
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer department allocated above fair share, attempting to reclaim for job", func() {
@@ -682,7 +682,7 @@ var _ = Describe("Reclaimable - Single department", func() {
 		queues["default"].GPU.Deserved = 1
 		queues["default"].GPU.FairShare = 1
 		queues["default"].GPU.Allocated = 3
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 })
@@ -782,13 +782,13 @@ var _ = Describe("Reclaimable - Multiple departments", func() {
 		reclaimable = New(true, taskOrderFunc)
 	})
 	It("Reclaimer is below fair share, reclaimee above fair share - sanity", func() {
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimee department goes below fair share", func() {
 		queues["p2"].GPU.Allocated = 2
 		queues["d2"].GPU.Allocated = 2
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer department is below deserved and reclaimee department is above deserved but within fair share", func() {
@@ -796,7 +796,7 @@ var _ = Describe("Reclaimable - Multiple departments", func() {
 		queues["d1"].GPU.Allocated = 1
 		queues["p2"].GPU.FairShare = 4
 		queues["d2"].GPU.FairShare = 4
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 })
@@ -875,7 +875,7 @@ var _ = Describe("Reclaimable - Multiple hierarchy levels", func() {
 		}
 		reclaimable = New(true, taskOrderFunc)
 		reclaimees := []*podgroup_info.PodGroupInfo{reclaimee}
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 	It("Reclaimer top queue will go over quota - don't reclaim", func() {
@@ -930,7 +930,7 @@ var _ = Describe("Reclaimable - Multiple hierarchy levels", func() {
 		}
 		reclaimable = New(true, taskOrderFunc)
 		reclaimees := []*podgroup_info.PodGroupInfo{reclaimee}
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer in the same tree branch and will go over fair share - don't reclaim", func() {
@@ -984,7 +984,7 @@ var _ = Describe("Reclaimable - Multiple hierarchy levels", func() {
 		reclaimerInfo.Queue = "left-leaf1"
 
 		reclaimees := []*podgroup_info.PodGroupInfo{reclaimee}
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(false))
 	})
 	It("Reclaimer in the same tree branch - reclaim", func() {
@@ -1050,7 +1050,7 @@ var _ = Describe("Reclaimable - Multiple hierarchy levels", func() {
 		}
 
 		reclaimees := []*podgroup_info.PodGroupInfo{reclaimee, reclaimee2}
-		result := reclaimable.Reclaimable(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
+		result := reclaimable.HasReclaimableResources(queues, reclaimerInfo, reclaimeeResourcesByQueue(reclaimees))
 		Expect(result).To(Equal(true))
 	})
 })

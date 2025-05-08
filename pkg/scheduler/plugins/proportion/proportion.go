@@ -62,7 +62,7 @@ func (pp *proportionPlugin) OnSessionOpen(ssn *framework.Session) {
 	capacityPolicy := cp.New(pp.queues, ssn.IsInferencePreemptible())
 	ssn.AddQueueOrderFn(pp.queueOrder)
 	ssn.AddCanReclaimResourcesFn(pp.CanReclaimResourcesFn)
-	ssn.AddReclaimableFn(pp.reclaimableFn)
+	ssn.AddHasReclaimableResourcesFn(pp.hasReclaimableResourcesFn)
 	ssn.AddOnJobSolutionStartFn(pp.OnJobSolutionStartFn)
 	ssn.AddIsNonPreemptibleJobOverQueueQuotaFns(capacityPolicy.IsNonPreemptibleJobOverQuota)
 	ssn.AddIsJobOverCapacityFn(capacityPolicy.IsJobOverQueueCapacity)
@@ -95,11 +95,11 @@ func (pp *proportionPlugin) CanReclaimResourcesFn(reclaimer *reclaimer_info.Recl
 	return pp.reclaimablePlugin.CanReclaimResources(pp.queues, reclaimer)
 }
 
-func (pp *proportionPlugin) reclaimableFn(
+func (pp *proportionPlugin) hasReclaimableResourcesFn(
 	reclaimer *reclaimer_info.ReclaimerInfo,
 	reclaimeeResourcesByQueue map[common_info.QueueID][]*resource_info.Resource,
 ) bool {
-	return pp.reclaimablePlugin.Reclaimable(pp.jobSimulationQueues, reclaimer, reclaimeeResourcesByQueue)
+	return pp.reclaimablePlugin.HasReclaimableResources(pp.jobSimulationQueues, reclaimer, reclaimeeResourcesByQueue)
 }
 
 func (pp *proportionPlugin) calculateResourcesProportion(ssn *framework.Session) {

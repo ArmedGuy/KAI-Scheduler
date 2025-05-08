@@ -102,7 +102,7 @@ func attemptToPreemptForPreemptor(
 	return solver.Solve(ssn, preemptor)
 }
 
-func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
+func buildFilterFuncForPreempt(ssn *framework.Session, preemptor *podgroup_info.PodGroupInfo,
 	isInferencePreemptible bool) func(*podgroup_info.PodGroupInfo) bool {
 	return func(job *podgroup_info.PodGroupInfo) bool {
 		if !job.IsPreemptibleJob(isInferencePreemptible) {
@@ -122,6 +122,10 @@ func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
 			return false
 		}
 
+		if !ssn.IsPreemptible(preemptor, job) {
+			return false
+		}
+
 		for _, task := range job.PodInfos {
 			if pod_status.IsActiveAllocatedStatus(task.Status) {
 				return true
@@ -134,7 +138,7 @@ func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
 
 func getOrderedVictimsQueue(ssn *framework.Session, preemptor *podgroup_info.PodGroupInfo) solvers.GenerateVictimsQueue {
 	return func() *utils.JobsOrderByQueues {
-		filter := buildFilterFuncForPreempt(preemptor, ssn.IsInferencePreemptible())
+		filter := buildFilterFuncForPreempt(ssn, preemptor, ssn.IsInferencePreemptible())
 		victimsQueue := utils.GetVictimsQueue(ssn, filter)
 		return victimsQueue
 	}

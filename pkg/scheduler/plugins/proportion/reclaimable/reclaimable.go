@@ -50,7 +50,7 @@ func (r *Reclaimable) CanReclaimResources(
 	return true
 }
 
-func (r *Reclaimable) Reclaimable(
+func (r *Reclaimable) HasReclaimableResources(
 	queues map[common_info.QueueID]*rs.QueueAttributes,
 	reclaimer *reclaimer_info.ReclaimerInfo,
 	reclaimeeResourcesByQueue map[common_info.QueueID][]*resource_info.Resource,
