@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/node_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/podgroup_info"
@@ -22,7 +23,7 @@ type JobSolver struct {
 	feasibleNodes        []*node_info.NodeInfo
 	solutionValidator    SolutionValidator
 	generateVictimsQueue GenerateVictimsQueue
-	actionType           framework.ActionType
+	actionType           api.ActionType
 }
 
 type solvingState struct {
@@ -34,7 +35,7 @@ func NewJobsSolver(
 	feasibleNodes []*node_info.NodeInfo,
 	solutionValidator SolutionValidator,
 	generateVictimsQueue GenerateVictimsQueue,
-	action framework.ActionType,
+	action api.ActionType,
 ) *JobSolver {
 	return &JobSolver{
 		feasibleNodes:        feasibleNodes,

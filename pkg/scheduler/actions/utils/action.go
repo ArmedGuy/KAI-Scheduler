@@ -46,7 +46,7 @@ func GetVictimsQueue(
 	return &victimsQueue
 }
 
-func GetMessageOfEviction(ssn *framework.Session, actionType framework.ActionType, preempteeTask *pod_info.PodInfo,
+func GetMessageOfEviction(ssn *framework.Session, actionType api.ActionType, preempteeTask *pod_info.PodInfo,
 	preemptorJob *podgroup_info.PodGroupInfo) string {
 	switch actionType {
 	case framework.Preempt:

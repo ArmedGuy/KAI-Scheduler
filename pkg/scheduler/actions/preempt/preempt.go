@@ -9,6 +9,7 @@ import (
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common/solvers"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/common_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_status"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/podgroup_info"
@@ -24,7 +25,7 @@ func New() *preemptAction {
 	return &preemptAction{}
 }
 
-func (alloc *preemptAction) Name() framework.ActionType {
+func (alloc *preemptAction) Name() api.ActionType {
 	return framework.Preempt
 }
 
@@ -102,10 +103,9 @@ func attemptToPreemptForPreemptor(
 	return solver.Solve(ssn, preemptor)
 }
 
-func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
-	isInferencePreemptible bool) func(*podgroup_info.PodGroupInfo) bool {
+func buildFilterFuncForPreempt(ssn *framework.Session, preemptor *podgroup_info.PodGroupInfo) func(*podgroup_info.PodGroupInfo) bool {
 	return func(job *podgroup_info.PodGroupInfo) bool {
-		if !job.IsPreemptibleJob(isInferencePreemptible) {
+		if !job.IsPreemptibleJob(ssn.IsInferencePreemptible()) {
 			return false
 		}
 
@@ -122,6 +122,10 @@ func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
 			return false
 		}
 
+		if !ssn.IsPreemptible(framework.Preempt, preemptor, job) {
+			return false
+		}
+
 		for _, task := range job.PodInfos {
 			if pod_status.IsActiveAllocatedStatus(task.Status) {
 				return true
@@ -134,7 +138,7 @@ func buildFilterFuncForPreempt(preemptor *podgroup_info.PodGroupInfo,
 
 func getOrderedVictimsQueue(ssn *framework.Session, preemptor *podgroup_info.PodGroupInfo) solvers.GenerateVictimsQueue {
 	return func() *utils.JobsOrderByQueues {
-		filter := buildFilterFuncForPreempt(preemptor, ssn.IsInferencePreemptible())
+		filter := buildFilterFuncForPreempt(ssn, preemptor)
 		victimsQueue := utils.GetVictimsQueue(ssn, filter)
 		return victimsQueue
 	}

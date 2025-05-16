@@ -22,7 +22,7 @@ func New() *staleGangEviction {
 	return &staleGangEviction{}
 }
 
-func (action *staleGangEviction) Name() framework.ActionType {
+func (action *staleGangEviction) Name() api.ActionType {
 	return framework.StaleGangEviction
 }
 

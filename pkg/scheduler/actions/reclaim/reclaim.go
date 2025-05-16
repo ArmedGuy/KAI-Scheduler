@@ -9,6 +9,7 @@ import (
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common/solvers"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/common_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/podgroup_info"
@@ -26,7 +27,7 @@ func New() *reclaimAction {
 	return &reclaimAction{}
 }
 
-func (ra *reclaimAction) Name() framework.ActionType {
+func (ra *reclaimAction) Name() api.ActionType {
 	return framework.Reclaim
 }
 
@@ -101,7 +102,7 @@ func (ra *reclaimAction) attemptToReclaimForSpecificJob(
 	solver := solvers.NewJobsSolver(
 		feasibleNodes,
 		reclaimableScenarioCheck(ssn, reclaimerInfo),
-		getOrderedVictimsQueue(ssn, reclaimerInfo),
+		getOrderedVictimsQueue(ssn, reclaimer),
 		framework.Reclaim)
 	return solver.Solve(ssn, reclaimer)
 }
@@ -127,7 +128,7 @@ func buildReclaimerInfo(ssn *framework.Session, reclaimerJob *podgroup_info.PodG
 	}
 }
 
-func getOrderedVictimsQueue(ssn *framework.Session, reclaimerInfo *reclaimer_info.ReclaimerInfo) solvers.GenerateVictimsQueue {
+func getOrderedVictimsQueue(ssn *framework.Session, reclaimer *podgroup_info.PodGroupInfo) solvers.GenerateVictimsQueue {
 	return func() *utils.JobsOrderByQueues {
 		jobsOrderedByQueue := utils.NewJobsOrderByQueues(ssn, utils.JobsOrderInitOptions{
 			FilterNonPreemptible:     true,
@@ -137,10 +138,10 @@ func getOrderedVictimsQueue(ssn *framework.Session, reclaimerInfo *reclaimer_inf
 		})
 		jobs := map[common_info.PodGroupID]*podgroup_info.PodGroupInfo{}
 		for _, job := range ssn.PodGroupInfos {
-			if job.Queue == reclaimerInfo.Queue {
+			if job.Queue == reclaimer.Queue {
 				continue
 			}
-			if !ssn.ReclaimeeFilter(reclaimerInfo, job) {
+			if !ssn.IsPreemptible(framework.Reclaim, reclaimer, job) {
 				continue
 			}
 			jobs[job.UID] = job

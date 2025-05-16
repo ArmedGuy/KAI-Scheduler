@@ -48,7 +48,7 @@ type Session struct {
 	JobOrderFns                           []common_info.CompareFn
 	QueueOrderFns                         []CompareQueueFn
 	CanReclaimResourcesFns                []api.CanReclaimResourcesFn
-	ReclaimeeFilterFns                    []api.ReclaimeeFilterFn
+	IsPreemptibleFns                      []api.IsPreemptibleFn
 	ReclaimScenarioValidators             []api.ReclaimValidatorFn
 	OnJobSolutionStartFns                 []api.OnJobSolutionStartFn
 	GetQueueAllocatedResourcesFns         []api.QueueResource
@@ -383,7 +383,7 @@ func (ssn *Session) UseSchedulingSignatures() bool {
 	return ssn.SchedulerParams.UseSchedulingSignatures
 }
 
-func (ssn *Session) GetJobsDepth(action ActionType) int {
+func (ssn *Session) GetJobsDepth(action api.ActionType) int {
 	maxJobs, foundForAction := ssn.Config.QueueDepthPerAction[string(action)]
 	if !foundForAction {
 		return scheduler_util.QueueCapacityInfinite

@@ -67,8 +67,8 @@ func (ssn *Session) AddGetQueueAllocatedResourcesFn(of api.QueueResource) {
 	ssn.GetQueueAllocatedResourcesFns = append(ssn.GetQueueAllocatedResourcesFns, of)
 }
 
-func (ssn *Session) AddReclaimeeFilterFn(rf api.ReclaimeeFilterFn) {
-	ssn.ReclaimeeFilterFns = append(ssn.ReclaimeeFilterFns, rf)
+func (ssn *Session) AddIsPreemptibleFn(rf api.IsPreemptibleFn) {
+	ssn.IsPreemptibleFns = append(ssn.IsPreemptibleFns, rf)
 }
 
 func (ssn *Session) AddHttpHandler(path string, handler func(http.ResponseWriter, *http.Request)) {
@@ -89,9 +89,9 @@ func (ssn *Session) CanReclaimResources(reclaimer *reclaimer_info.ReclaimerInfo)
 	return false
 }
 
-func (ssn *Session) ReclaimeeFilter(reclaimer *reclaimer_info.ReclaimerInfo, victim *podgroup_info.PodGroupInfo) bool {
-	for _, rf := range ssn.ReclaimeeFilterFns {
-		if !rf(reclaimer, victim) {
+func (ssn *Session) IsPreemptible(actionType api.ActionType, preemptor, preemptee *podgroup_info.PodGroupInfo) bool {
+	for _, pf := range ssn.IsPreemptibleFns {
+		if !pf(actionType, preemptor, preemptee) {
 			return false
 		}
 	}

@@ -3,7 +3,11 @@
 
 package framework
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
+)
 
 var pluginMutex sync.Mutex
 
@@ -28,7 +32,7 @@ func GetPluginBuilder(name string) (PluginBuilder, bool) {
 }
 
 // Action management
-var actionMap = map[ActionType]Action{}
+var actionMap = map[api.ActionType]Action{}
 
 func RegisterAction(act Action) {
 	pluginMutex.Lock()
@@ -41,6 +45,6 @@ func GetAction(name string) (Action, bool) {
 	pluginMutex.Lock()
 	defer pluginMutex.Unlock()
 
-	act, found := actionMap[ActionType(name)]
+	act, found := actionMap[api.ActionType(name)]
 	return act, found
 }

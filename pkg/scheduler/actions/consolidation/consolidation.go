@@ -9,6 +9,7 @@ import (
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common/solvers"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_status"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/podgroup_info"
@@ -25,7 +26,7 @@ func New() *consolidationAction {
 	return &consolidationAction{}
 }
 
-func (alloc *consolidationAction) Name() framework.ActionType {
+func (alloc *consolidationAction) Name() api.ActionType {
 	return framework.Consolidation
 }
 

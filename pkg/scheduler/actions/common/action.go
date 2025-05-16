@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/common_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/eviction_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/node_info"
@@ -21,7 +22,7 @@ import (
 
 func EvictAllPreemptees(ssn *framework.Session, preempteeTasks []*pod_info.PodInfo,
 	preemptor *podgroup_info.PodGroupInfo, stmt *framework.Statement,
-	actionType framework.ActionType) error {
+	actionType api.ActionType) error {
 
 	messages := getEvictionMessages(ssn, preempteeTasks, preemptor, actionType)
 	for _, task := range preempteeTasks {
@@ -48,7 +49,7 @@ func EvictAllPreemptees(ssn *framework.Session, preempteeTasks []*pod_info.PodIn
 
 // getEvictionMessages generates all eviction message based on the state before any task was evicted
 func getEvictionMessages(ssn *framework.Session, tasks []*pod_info.PodInfo, preemptor *podgroup_info.PodGroupInfo,
-	actionType framework.ActionType) map[common_info.PodID]string {
+	actionType api.ActionType) map[common_info.PodID]string {
 	messages := map[common_info.PodID]string{}
 	for _, task := range tasks {
 		messages[task.UID] = utils.GetMessageOfEviction(ssn, actionType, task, preemptor)

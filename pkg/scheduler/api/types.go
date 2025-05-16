@@ -13,6 +13,9 @@ import (
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/resource_info"
 )
 
+// ActionType is the different types of actions that can be performed by the scheduler.
+type ActionType string
+
 // PredicateFn is used to predicate node for task.
 type PredicateFn func(*pod_info.PodInfo, *podgroup_info.PodGroupInfo, *node_info.NodeInfo) error
 
@@ -22,8 +25,8 @@ type PrePredicateFn func(*pod_info.PodInfo, *podgroup_info.PodGroupInfo) error
 // CanReclaimResourcesFn is a function that determines if a reclaimer can get more resources
 type CanReclaimResourcesFn func(*reclaimer_info.ReclaimerInfo) bool
 
-// ReclaimeeFilterFn is a function which filters out jobs that cannot a reclaimee candidate for a specific reclaimer.
-type ReclaimeeFilterFn func(*reclaimer_info.ReclaimerInfo, *podgroup_info.PodGroupInfo) bool
+// IsPreemptibleFn is a function that determines if a job can be preempted by another job.
+type IsPreemptibleFn func(actionType ActionType, preemptor, preemptee *podgroup_info.PodGroupInfo) bool
 
 // ReclaimValidatorFn is a function which determines the validity of a reclaim scenario.
 type ReclaimValidatorFn func(*reclaimer_info.ReclaimerInfo, []*podgroup_info.PodGroupInfo, []*pod_info.PodInfo) bool

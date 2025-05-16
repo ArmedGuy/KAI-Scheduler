@@ -8,6 +8,7 @@ import (
 
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common/solvers/scenario"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/common_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/node_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/pod_info"
@@ -46,14 +47,14 @@ type byPodSolver struct {
 	feasibleNodes            map[string]*node_info.NodeInfo
 	solutionValidator        SolutionValidator
 	allowVictimConsolidation bool
-	actionType               framework.ActionType
+	actionType               api.ActionType
 }
 
 func newByPodSolver(
 	feasibleNodes map[string]*node_info.NodeInfo,
 	checkVictims SolutionValidator,
 	allowVictimConsolidation bool,
-	action framework.ActionType,
+	action api.ActionType,
 ) *byPodSolver {
 	return &byPodSolver{
 		feasibleNodes:            feasibleNodes,

@@ -8,6 +8,7 @@ import (
 
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/common"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/actions/utils"
+	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api/podgroup_info"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/framework"
 	"github.com/NVIDIA/KAI-scheduler/pkg/scheduler/log"
@@ -21,7 +22,7 @@ func New() *allocateAction {
 	return &allocateAction{}
 }
 
-func (alloc *allocateAction) Name() framework.ActionType {
+func (alloc *allocateAction) Name() api.ActionType {
 	return framework.Allocate
 }
 

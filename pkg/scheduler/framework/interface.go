@@ -3,20 +3,20 @@
 
 package framework
 
-type ActionType string
+import "github.com/NVIDIA/KAI-scheduler/pkg/scheduler/api"
 
 const (
-	Reclaim           ActionType = "reclaim"
-	Preempt           ActionType = "preempt"
-	Allocate          ActionType = "allocate"
-	Consolidation     ActionType = "consolidation"
-	StaleGangEviction ActionType = "stalegangeviction"
+	Reclaim           api.ActionType = "reclaim"
+	Preempt           api.ActionType = "preempt"
+	Allocate          api.ActionType = "allocate"
+	Consolidation     api.ActionType = "consolidation"
+	StaleGangEviction api.ActionType = "stalegangeviction"
 )
 
 // Action is the interface of scheduler action.
 type Action interface {
 	// The unique name of Action.
-	Name() ActionType
+	Name() api.ActionType
 
 	// Execute allocates the cluster's resources into each queue.
 	Execute(ssn *Session)
